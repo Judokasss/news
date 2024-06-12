@@ -51,7 +51,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: [
-        const Locale('ru', 'RU'),
+        const Locale('ru', 'RU'), // Добавьте русский язык
       ],
       home: Scaffold(
         body: IndexedStack(
@@ -70,7 +70,7 @@ class _MyAppState extends State<MyApp> {
               label: 'Главная',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.remove_red_eye),
+              icon: Icon(Icons.remove_red_eye), // иконка просмотра
               label: 'Просмотренное',
             ),
           ],

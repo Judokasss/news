@@ -69,7 +69,7 @@ class _NewsListState extends State<NewsList> {
   fetchData() async {
     http.Response response;
     response = await http.get(Uri.parse(
-        'https://newsapi.org/v2/top-headlines?country=ru&apiKey=11f269aac2b24c5f9a21e9c5909b824d'));
+        'https://newsapi.org/v2/top-headlines?country=ru&apiKey=65a7f93a1a904c8ba767b37f2e3e6c57'));
     setState(() {
       data = json.decode(response.body)['articles'];
       _isLoading = false;
@@ -78,7 +78,7 @@ class _NewsListState extends State<NewsList> {
 
   fetchData2() async {
     String url =
-        'https://newsapi.org/v2/everything?q=$_searchQuery&from=${DateFormat('yyyy-MM-dd').format(_selectedDate)}&sortBy=$_sortBy&apiKey=11f269aac2b24c5f9a21e9c5909b824d';
+        'https://newsapi.org/v2/everything?q=$_searchQuery&from=${DateFormat('yyyy-MM-dd').format(_selectedDate)}&sortBy=$_sortBy&apiKey=65a7f93a1a904c8ba767b37f2e3e6c57';
     http.Response response = await http.get(Uri.parse(url));
     setState(() {
       data = json.decode(response.body)['articles'];
@@ -101,90 +101,133 @@ class _NewsListState extends State<NewsList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Новостной клиент'),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () async {
-                final query = await showDialog<String>(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text('Поиск'),
-                      content: TextField(
-                        onChanged: (value) {
-                          _setSearchQuery(value);
+      appBar: AppBar(
+        title: Text('Новостной клиент'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () async {
+              final query = await showDialog<String>(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('Поиск'),
+                    content: TextField(
+                      onChanged: (value) {
+                        _setSearchQuery(value);
+                      },
+                      decoration: InputDecoration(hintText: 'Введите запрос'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
                         },
-                        decoration: InputDecoration(hintText: 'Введите запрос'),
+                        child: Text('Отмена'),
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text('Отмена'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, _searchQuery);
-                          },
-                          child: Text('OK'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-                if (query != null) {
-                  _setSearchQuery(query);
-                }
-              },
-            ),
-          ],
-        ),
-        body: Container(
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, _searchQuery);
+                        },
+                        child: Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
+              if (query != null) {
+                _setSearchQuery(query);
+              }
+            },
+          ),
+        ],
+      ),
+      body: Container(
+        padding: EdgeInsets.all(16.0),
+        child: Container(
           padding: EdgeInsets.all(16.0),
-          child: _isLoading
-              ? Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      padding: EdgeInsets.all(16.0),
-                      child: ListTile(
-                        title: Text(
-                          data[index]['title'] ?? 'Нет заголовка',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20),
-                        ),
-                        subtitle: Text(
-                          DateFormat('d MMMM yyyy - HH:mm', 'ru_RU').format(
-                                  DateTime.parse(data[index]['publishedAt'])) ??
-                              'Дата неизвестна',
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => NewsDetail(
-                                newsData: data[index],
+          child: Column(
+            children: [
+              ListTile(
+                title:
+                    Text('Выбор даты', style: TextStyle(color: Colors.black)),
+                trailing: Text(
+                  DateFormat('d MMMM yyyy').format(_selectedDate),
+                  style: TextStyle(color: Colors.black, fontSize: 15),
+                ),
+                onTap: () {
+                  _selectDate(context);
+                },
+              ),
+              ListTile(
+                title: Text('Сортировать по',
+                    style: TextStyle(color: Colors.black)),
+                trailing: DropdownButton<String>(
+                  value: _sortBy,
+                  onChanged: (String? newValue) {
+                    _setSortBy(newValue!);
+                  },
+                  items: <String>['popularity', 'relevancy', 'publishedAt']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value, style: TextStyle(color: Colors.black)),
+                    );
+                  }).toList(),
+                ),
+              ),
+              Expanded(
+                child: _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        itemCount: data.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: EdgeInsets.symmetric(vertical: 8.0),
+                            decoration: BoxDecoration(
+                              color: Color.fromARGB(220, 255, 255, 255),
+                              border: Border.all(
+                                  color: Color.fromARGB(255, 0, 0, 0)),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: ListTile(
+                              minVerticalPadding: 30,
+                              title: Text(
+                                data[index]['title'] ?? 'Нет заголовка',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
                               ),
+                              subtitle: Text(
+                                DateFormat('d MMMM yyyy - HH:mm', 'ru_RU')
+                                        .format(
+                                      DateTime.parse(
+                                          data[index]['publishedAt']),
+                                    ) ??
+                                    'Дата неизвестна',
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => NewsDetail(
+                                      newsData: data[index],
+                                    ),
+                                  ),
+                                );
+                                saveViewedNews(data[index]);
+                              },
                             ),
                           );
-                          saveViewedNews(data[index]);
                         },
                       ),
-                    );
-                  },
-                ),
-        ));
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
